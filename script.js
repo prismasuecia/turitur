@@ -468,10 +468,10 @@ class NameWheel {
         
         // Segment i börjar vid: i * sliceAngle + normalizedRotation (globala grader)
         // Pekaren är vid: 3π/2 (överst)
-        // Vi vill: i * sliceAngle + normalizedRotation ≡ 3π/2
-        // Så: i = (3π/2 - normalizedRotation) / sliceAngle
+        // Vi vill veta vilken segment som INNEHÅLLER 3π/2
+        // Använd round() för att få NÄRMASTE segment center
         
-        let selectedIndex = Math.floor((3 * Math.PI / 2 - normalizedRotation) / sliceAngle);
+        let selectedIndex = Math.round((3 * Math.PI / 2 - normalizedRotation) / sliceAngle);
         selectedIndex = ((selectedIndex % displayNames.length) + displayNames.length) % displayNames.length;
         
         const selectedName = displayNames[selectedIndex];
