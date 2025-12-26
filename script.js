@@ -468,7 +468,8 @@ class NameWheel {
         
         // Pointer is at top (0 degrees)
         const pointerAngle = (2 * Math.PI - normalizedRotation) % (2 * Math.PI);
-        const selectedIndex = Math.floor(pointerAngle / sliceAngle) % displayNames.length;
+        // Add half slice to center selection on each segment
+        const selectedIndex = Math.floor((pointerAngle + sliceAngle / 2) / sliceAngle) % displayNames.length;
         
         return displayNames[selectedIndex];
     }
