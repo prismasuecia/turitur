@@ -464,33 +464,18 @@ class NameWheel {
         if (displayNames.length === 0) return null;
         
         const sliceAngle = (2 * Math.PI) / displayNames.length;
-        
-        // Segment i börjar vid vinkel: i * sliceAngle (innan rotation)
-        // Efter rotation medsols med currentRotation, ligger segment i vid globala vinkeln:
-        // globalAngle = i * sliceAngle - currentRotation
-        
-        // Pekaren är överst: globalAngle = 3π/2
-        // Vi vill hitta i där: i * sliceAngle - currentRotation = 3π/2
-        // Alltså: i = (3π/2 + currentRotation) / sliceAngle
-        
         const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        // Log alla segment och deras globala positioner
-        console.log('=== SEGMENT POSITIONS ===');
-        console.log('Normalized rotation:', normalizedRotation, 'radians', (normalizedRotation * 180 / Math.PI), 'degrees');
-        console.log('Slice angle:', sliceAngle, 'radians', (sliceAngle * 180 / Math.PI), 'degrees');
-        displayNames.forEach((name, index) => {
-            const globalAngle = (index * sliceAngle - normalizedRotation + 2 * Math.PI) % (2 * Math.PI);
-            console.log(`Index ${index}: ${name} - Global angle: ${globalAngle} (${globalAngle * 180 / Math.PI}°)`);
-        });
-        console.log('Pointer at: 3π/2 = 270°');
-        console.log('=====================');
+        // Segment i börjar vid vinkel: i * sliceAngle (innan rotation)
+        // Efter rotation blir det: i * sliceAngle + currentRotation
+        // Pekaren är överst (3π/2)
+        // Vi vill: i * sliceAngle + currentRotation = 3π/2
+        // i = (3π/2 - currentRotation) / sliceAngle
         
-        let selectedIndex = Math.round((3 * Math.PI / 2 + normalizedRotation) / sliceAngle);
-        selectedIndex = selectedIndex % displayNames.length;
+        let selectedIndex = Math.round((3 * Math.PI / 2 - normalizedRotation) / sliceAngle);
+        selectedIndex = ((selectedIndex % displayNames.length) + displayNames.length) % displayNames.length;
         
         const selectedName = displayNames[selectedIndex];
-        console.log('SELECTED INDEX:', selectedIndex, 'NAME:', selectedName);
         
         return selectedName;
     }
