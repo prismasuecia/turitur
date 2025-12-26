@@ -475,10 +475,22 @@ class NameWheel {
         
         const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
+        // Log alla segment och deras globala positioner
+        console.log('=== SEGMENT POSITIONS ===');
+        console.log('Normalized rotation:', normalizedRotation, 'radians', (normalizedRotation * 180 / Math.PI), 'degrees');
+        console.log('Slice angle:', sliceAngle, 'radians', (sliceAngle * 180 / Math.PI), 'degrees');
+        displayNames.forEach((name, index) => {
+            const globalAngle = (index * sliceAngle - normalizedRotation + 2 * Math.PI) % (2 * Math.PI);
+            console.log(`Index ${index}: ${name} - Global angle: ${globalAngle} (${globalAngle * 180 / Math.PI}°)`);
+        });
+        console.log('Pointer at: 3π/2 = 270°');
+        console.log('=====================');
+        
         let selectedIndex = Math.round((3 * Math.PI / 2 + normalizedRotation) / sliceAngle);
         selectedIndex = selectedIndex % displayNames.length;
         
         const selectedName = displayNames[selectedIndex];
+        console.log('SELECTED INDEX:', selectedIndex, 'NAME:', selectedName);
         
         return selectedName;
     }
