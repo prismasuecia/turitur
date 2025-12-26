@@ -466,13 +466,44 @@ class NameWheel {
         const sliceAngle = (2 * Math.PI) / displayNames.length;
         const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        // Testa: maybe rotation är motsatt riktning
-        let selectedIndex = Math.floor((normalizedRotation - 3 * Math.PI / 2) / sliceAngle);
-        selectedIndex = ((selectedIndex % displayNames.length) + displayNames.length) % displayNames.length;
+        // DEBUG: Visualisera alla segments globala vinklar
+        console.clear();
+        console.log('='.repeat(60));
+        console.log('POINTER POSITION TEST');
+        console.log('='.repeat(60));
+        console.log('normalizedRotation:', (normalizedRotation * 180 / Math.PI).toFixed(1) + '°');
+        console.log('sliceAngle:', (sliceAngle * 180 / Math.PI).toFixed(1) + '°');
+        console.log('');
+        console.log('Segment positions (GLOBAL angles):');
         
-        const selectedName = displayNames[selectedIndex];
+        let closestIndex = 0;
+        let closestDistance = Math.PI;
+        const pointerAngle = 3 * Math.PI / 2; // Överst
         
-        return selectedName;
+        displayNames.forEach((name, index) => {
+            // Segment i börjar vid vinkel: index * sliceAngle + normalizedRotation (globala koordinater)
+            const segmentStart = (index * sliceAngle + normalizedRotation) % (2 * Math.PI);
+            const segmentMid = (segmentStart + sliceAngle / 2) % (2 * Math.PI);
+            const segmentEnd = ((index + 1) * sliceAngle + normalizedRotation) % (2 * Math.PI);
+            
+            // Hur långt från pekaren är mitten av detta segment?
+            let distance = Math.abs(segmentMid - pointerAngle);
+            if (distance > Math.PI) distance = 2 * Math.PI - distance; // Kortaste vägen runt cirkeln
+            
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestIndex = index;
+            }
+            
+            console.log(`  [${index}] ${name.padEnd(15)} | Start: ${(segmentStart * 180 / Math.PI).toFixed(1).padStart(6)}° | Mid: ${(segmentMid * 180 / Math.PI).toFixed(1).padStart(6)}° | Distance to pointer: ${(distance * 180 / Math.PI).toFixed(1).padStart(6)}°`);
+        });
+        
+        console.log('');
+        console.log('POINTER at:', (pointerAngle * 180 / Math.PI).toFixed(1) + '° (top)');
+        console.log('CLOSEST SEGMENT:', closestIndex, '(' + displayNames[closestIndex] + ')');
+        console.log('='.repeat(60));
+        
+        return displayNames[closestIndex];
     }
     
     saveToLocalStorage() {
