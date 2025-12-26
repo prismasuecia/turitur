@@ -466,13 +466,20 @@ class NameWheel {
         const sliceAngle = (2 * Math.PI) / displayNames.length;
         const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        // Segment i börjar vid: i * sliceAngle + normalizedRotation (globala grader)
-        // Pekaren är vid: 3π/2 (överst)
-        // Vi vill veta vilken segment som INNEHÅLLER 3π/2
-        // Använd round() för att få NÄRMASTE segment center
+        // Räkna från pekaren BAKÅT
+        // Pekaren är vid 3π/2 (överst)
+        // Segment 0 börjar vid angle 0, segment i börjar vid i * sliceAngle
+        // Efter rotation är segment i vid: i * sliceAngle + rotation
+        // Vi vill hitta i där: i * sliceAngle + rotation ligger mellan två 3π/2
+        // Actually: hitta vilket segment SLUTAR på eller strax innan pekaren
         
-        let selectedIndex = Math.round((3 * Math.PI / 2 - normalizedRotation) / sliceAngle);
-        selectedIndex = ((selectedIndex % displayNames.length) + displayNames.length) % displayNames.length;
+        // Enkelt: räkna hur många segment SOM BÖRJAR antes pekaren
+        let angle = 3 * Math.PI / 2 - normalizedRotation;
+        angle = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        
+        // Antal segments innan denna vinkel
+        let selectedIndex = Math.floor(angle / sliceAngle);
+        if (selectedIndex >= displayNames.length) selectedIndex = displayNames.length - 1;
         
         const selectedName = displayNames[selectedIndex];
         

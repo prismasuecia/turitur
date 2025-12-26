@@ -37,24 +37,28 @@ console.log('');
 testRotations.forEach(currentRotation => {
     const normalizedRotation = ((currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
     
-    // MIN NUVARANDE LOGIK
-    let selectedIndex = Math.floor((3 * Math.PI / 2 - normalizedRotation) / sliceAngle);
-    selectedIndex = ((selectedIndex % displayNames.length) + displayNames.length) % displayNames.length;
+    // FLOOR (gammal logik)
+    let selectedIndexFloor = Math.floor((3 * Math.PI / 2 - normalizedRotation) / sliceAngle);
+    selectedIndexFloor = ((selectedIndexFloor % displayNames.length) + displayNames.length) % displayNames.length;
     
-    console.log(`ROTATION: ${(normalizedRotation * 180 / Math.PI).toFixed(1).padStart(6)}° => Index ${selectedIndex} (${displayNames[selectedIndex]})`);
+    // ROUND (ny logik)
+    let selectedIndexRound = Math.round((3 * Math.PI / 2 - normalizedRotation) / sliceAngle);
+    selectedIndexRound = ((selectedIndexRound % displayNames.length) + displayNames.length) % displayNames.length;
+    
+    console.log(`ROTATION: ${(normalizedRotation * 180 / Math.PI).toFixed(1).padStart(6)}° => Floor: Index ${selectedIndexFloor} (${displayNames[selectedIndexFloor]}) | Round: Index ${selectedIndexRound} (${displayNames[selectedIndexRound]})`);
     
     // Visa vilka segment är vid pekaren för denna rotation
     console.log('  Segment positions efter denna rotation (globalt):');
     displayNames.forEach((name, index) => {
         const segmentStart = (index * sliceAngle + normalizedRotation) % (2 * Math.PI);
         const segmentEnd = ((index + 1) * sliceAngle + normalizedRotation) % (2 * Math.PI);
-        const isSelected = (selectedIndex === index) ? ' ◄-- SELECTED' : '';
-        console.log(`    [${index}] ${name.padEnd(10)} | ${(segmentStart * 180 / Math.PI).toFixed(1).padStart(6)}° - ${(segmentEnd * 180 / Math.PI).toFixed(1).padStart(6)}°${isSelected}`);
+        const selectedFloor = (selectedIndexFloor === index) ? ' ◄-- FLOOR' : '';
+        const selectedRound = (selectedIndexRound === index) ? ' ◄-- ROUND' : '';
+        console.log(`    [${index}] ${name.padEnd(10)} | ${(segmentStart * 180 / Math.PI).toFixed(1).padStart(6)}° - ${(segmentEnd * 180 / Math.PI).toFixed(1).padStart(6)}°${selectedFloor}${selectedRound}`);
     });
     console.log('');
 });
 
 console.log('='.repeat(80));
-console.log('FRÅGA: Om du suddar ett segment från det synliga hjulet, ser du');
-console.log('något mönster? Väljs alltid rätt segment? Eller är det alltid off-by-one?');
+console.log('FRÅGA: Vilken mellan floor och round ser ut att fungera bättre?');
 console.log('='.repeat(80));
