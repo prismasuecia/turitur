@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tur i tur - Name Wheel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tur i tur</h1>
+            <p class="subtitle">utvecklat för klassrummet av <a href="https://www.prismasuecia.se" target="_blank" rel="noopener">Prisma Utbildning</a></p>
+            <a href="https://www.prismasuecia.se" target="_blank" rel="noopener" class="header-logo-link">
+                <img src="imag de, Firefly Upscaler, 2x skala.png" alt="Logo" class="header-logo">
+            </a>
+        </header>
+
+        <main>
+            <div class="main-layout">
+                <!-- Left: Wheel Section (Main Focus) -->
+                <div class="wheel-section">
+                    <div class="wheel-container">
+                        <canvas id="wheelCanvas" width="600" height="600"></canvas>
+                        <button id="spinButton" class="spin-button">Snurra!</button>
+                    </div>
+                    <!-- Drawn Names History -->
+                    <div class="history-section">
+                        <button class="history-toggle" id="historyToggle">📋 Dragningshistorik</button>
+                        <div id="historyContent" class="history-content">
+                            <div id="historyList" class="history-list"></div>
+                            <button id="clearHistoryButton" class="btn btn-small">Rensa historik</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Control Panel -->
+                <div class="control-panel">
+                    <div class="input-section">
+                        <h3>Lägg till namn</h3>
+                        <div class="input-group">
+                            <textarea id="nameInput" placeholder="Skriv ett namn eller klistra in flera (ett per rad eller kommaseparerat)" autocomplete="off" spellcheck="false" style="font-family: 'Segoe UI', Arial, sans-serif; -webkit-user-select: text; user-select: text;"></textarea>
+                            <button id="addButton" class="btn btn-primary">Lägg till</button>
+                        </div>
+                    </div>
+
+                    <div class="options-actions-section">
+                        <div class="options-col">
+                            <h4>Inställningar</h4>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="excludeDrawn" />
+                                Exkludera dragna namn
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showDrawn" checked />
+                                Visa dragna namn
+                            </label>
+                        </div>
+                        <div class="actions-col">
+                            <h4>Åtgärder</h4>
+                            <button id="clearButton" class="btn btn-secondary">Rensa lista</button>
+                            <button id="resetButton" class="btn btn-secondary">Återställ</button>
+                        </div>
+                    </div>
+
+                    <div class="classes-section">
+                        <div class="section-header">
+                            <h3>Klasslistor</h3>
+                            <button class="info-toggle" id="classesInfoBtn">ℹ️</button>
+                        </div>
+                        <div id="classesInfo" class="info-box">
+                            <div class="info-item">
+                                <strong>📋 Kopiera</strong> - Kopierar alla namn från klassen till urklipp så du kan klistra in i Excel, Word eller email.
+                            </div>
+                            <div class="info-item">
+                                <strong>📌 Duplicera</strong> - Skapar en kopia av klassen inuti appen (t.ex. "8A" blir "8A (kopia)") utan att påverka originalet.
+                            </div>
+                        </div>
+                        <div class="class-input-group">
+                            <input type="text" id="classNameInput" placeholder="Namn på klasslistan..." />
+                            <button id="saveClassButton" class="btn btn-primary">Spara</button>
+                        </div>
+                        <select id="classSelector" class="class-selector">
+                            <option value="">Välj klasslista...</option>
+                        </select>
+                        <div class="class-buttons">
+                            <button id="loadClassButton" class="btn btn-secondary">Ladda</button>
+                            <button id="copyClassButton" class="btn btn-secondary">Kopiera</button>
+                            <button id="duplicateClassButton" class="btn btn-secondary">Duplicera</button>
+                        </div>
+                        <button id="deleteClassButton" class="btn btn-secondary" style="width: 100%; margin-top: 5px;">Radera</button>
+                    </div>
+
+                    <div class="names-list">
+                        <h3>Namn på hjulet (<span id="nameCount">0</span>)</h3>
+                        <ul id="namesList"></ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
