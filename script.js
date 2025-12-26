@@ -50,16 +50,24 @@ class NameWheel {
     }
     
     setupCanvasSize() {
-        // Adjust canvas size based on viewport
-        if (window.innerWidth < 768) {
-            this.canvasWidth = 300;
-            this.canvasHeight = 300;
-        } else if (window.innerWidth < 1200) {
-            this.canvasWidth = 450;
-            this.canvasHeight = 450;
+        // Check if in fullscreen mode
+        if (document.body.classList.contains('fullscreen-mode')) {
+            // In fullscreen, let CSS handle the sizing
+            const vmin = Math.min(window.innerWidth, window.innerHeight) * 0.99;
+            this.canvasWidth = vmin;
+            this.canvasHeight = vmin;
         } else {
-            this.canvasWidth = 600;
-            this.canvasHeight = 600;
+            // Normal mode: adjust canvas size based on viewport
+            if (window.innerWidth < 768) {
+                this.canvasWidth = 300;
+                this.canvasHeight = 300;
+            } else if (window.innerWidth < 1200) {
+                this.canvasWidth = 450;
+                this.canvasHeight = 450;
+            } else {
+                this.canvasWidth = 600;
+                this.canvasHeight = 600;
+            }
         }
         
         this.canvas.width = this.canvasWidth;
@@ -85,6 +93,17 @@ class NameWheel {
         this.resetButton.addEventListener('click', () => this.reset());
         this.showDrawn.addEventListener('change', () => this.drawWheel());
         this.clearHistoryButton.addEventListener('click', () => this.clearHistory());
+        
+        // Fullscreen toggle
+        const fullscreenBtn = document.getElementById('fullscreenToggle');
+        fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+        
+        // Exit fullscreen on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.body.classList.contains('fullscreen-mode')) {
+                this.toggleFullscreen();
+            }
+        });
         
         // Class listeners
         this.saveClassButton.addEventListener('click', () => this.saveClass());
@@ -594,6 +613,21 @@ class NameWheel {
     
     toggleClassesInfo() {
         this.classesInfo.classList.toggle('show');
+    }
+    
+    toggleFullscreen() {
+        document.body.classList.toggle('fullscreen-mode');
+        
+        // Force canvas redraw in fullscreen
+        if (document.body.classList.contains('fullscreen-mode')) {
+            setTimeout(() => {
+                this.setupCanvasSize();
+                this.drawWheel();
+            }, 0);
+        } else {
+            this.setupCanvasSize();
+            this.drawWheel();
+        }
     }
 
     setupHistoryToggle() {
