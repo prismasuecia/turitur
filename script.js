@@ -466,14 +466,21 @@ class NameWheel {
         const sliceAngle = (2 * Math.PI) / displayNames.length;
         const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        // Pointer is at top. Calculate which segment index points at top
-        // Segment i spans from i*sliceAngle to (i+1)*sliceAngle after rotation
-        // We need to find which segment after rotation lands at position 3π/2
-        let angle = (normalizedRotation + 3 * Math.PI / 2) % (2 * Math.PI);
+        // Pointer is at top (3π/2). Find which segment is at that position after rotation.
+        // Segment index i starts at angle: i * sliceAngle
+        // After rotation, it's at: (i * sliceAngle - normalizedRotation)
+        // We want to find i where the rotated angle lands at 3π/2
+        
+        let angle = (3 * Math.PI / 2 - normalizedRotation) % (2 * Math.PI);
+        if (angle < 0) angle += 2 * Math.PI;
         
         const selectedIndex = Math.floor(angle / sliceAngle) % displayNames.length;
+        const selectedName = displayNames[selectedIndex];
         
-        return displayNames[selectedIndex];
+        console.log('Current rotation:', this.currentRotation, 'Normalized:', normalizedRotation);
+        console.log('Pointer angle calculation:', angle, 'Selected index:', selectedIndex, 'Name:', selectedName);
+        
+        return selectedName;
     }
     
     saveToLocalStorage() {
