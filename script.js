@@ -445,12 +445,6 @@ class NameWheel {
                 
                 // Get selected name
                 const selectedName = this.getSelectedName();
-                console.log('SPIN ENDED - selectedName:', selectedName);
-                console.log('  currentRotation:', (this.currentRotation * 180 / Math.PI).toFixed(1) + '°');
-                console.log('  drawnNames:', this.drawnNames);
-                const displayNames = this.names.filter(name => !this.drawnNames.includes(name));
-                console.log('  displayNames:', displayNames);
-                
                 if (selectedName) {
                     this.drawingHistory.unshift(selectedName);  // Lägg till i historik
                     if (!this.drawnNames.includes(selectedName)) {
