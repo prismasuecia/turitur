@@ -144,6 +144,9 @@ class NameWheel {
             return;
         }
         
+        // Clear drawing history when adding new names
+        this.drawingHistory = [];
+        
         // Add each name, skip duplicates
         let added = 0;
         let duplicates = 0;
@@ -528,6 +531,7 @@ class NameWheel {
         if (this.classes[selectedClass]) {
             this.names = [...this.classes[selectedClass].names];
             this.drawnNames = [];
+            this.drawingHistory = [];
             this.currentRotation = 0;
             this.updateUI();
             this.saveToLocalStorage();
