@@ -466,11 +466,9 @@ class NameWheel {
         const sliceAngle = (2 * Math.PI) / displayNames.length;
         const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        // Pointer is at top (0 degrees = -PI/2 in canvas coordinates)
-        // Canvas starts angle at right (0), we need angle from top
-        const pointerAngle = (3 * Math.PI / 2 - normalizedRotation) % (2 * Math.PI);
-        // Add half slice to center selection on each segment
-        const selectedIndex = Math.floor((pointerAngle + sliceAngle / 2) / sliceAngle) % displayNames.length;
+        // Pointer is at top (3π/2 in canvas coordinates)
+        // Find which segment is at the pointer position
+        const selectedIndex = Math.floor((3 * Math.PI / 2 - normalizedRotation) / sliceAngle) % displayNames.length;
         
         return displayNames[selectedIndex];
     }
