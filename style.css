@@ -216,6 +216,7 @@ body.fullscreen-mode #wheelCanvas {
     max-width: 100%;
     height: auto;
     filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.12));
+    background: transparent;
 }
 
 .spin-button {
@@ -223,14 +224,14 @@ body.fullscreen-mode #wheelCanvas {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 140px;
-    height: 140px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     background: white;
     border: 6px solid #0071e3;
     color: #0071e3;
     font-weight: 700;
-    font-size: 1.5em;
+    font-size: 1.3em;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
     box-shadow: 0 10px 30px rgba(0, 113, 227, 0.2);

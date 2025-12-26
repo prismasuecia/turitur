@@ -2,6 +2,7 @@ class NameWheel {
     constructor() {
         this.names = [];
         this.drawnNames = [];
+        this.drawingHistory = [];  // Sparar alla drag i ordning (kan ha duplikater)
         this.isSpinning = false;
         this.currentRotation = 0;
         this.classes = {}; // Spara klasslistor
@@ -193,6 +194,7 @@ class NameWheel {
         if (confirm('Är du säker på att du vill återställa allt?')) {
             this.names = [];
             this.drawnNames = [];
+            this.drawingHistory = [];
             this.currentRotation = 0;
             this.updateUI();
             this.saveToLocalStorage();
@@ -200,10 +202,10 @@ class NameWheel {
     }
     
     clearHistory() {
-        if (this.drawnNames.length === 0) return;
+        if (this.drawingHistory.length === 0) return;
         if (confirm('Är du säker på att du vill rensa historiken?')) {
-            this.drawnNames = [];
-            this.updateUI();
+            this.drawingHistory = [];
+            this.updateHistory();
             this.saveToLocalStorage();
         }
     }
@@ -241,12 +243,12 @@ class NameWheel {
     updateHistory() {
         this.historyList.innerHTML = '';
         
-        if (this.drawnNames.length === 0) {
+        if (this.drawingHistory.length === 0) {
             this.historyList.innerHTML = '<p class="empty-message">Ingen historia ännu</p>';
             return;
         }
         
-        this.drawnNames.forEach(name => {
+        this.drawingHistory.forEach(name => {
             const div = document.createElement('div');
             div.className = 'history-item drawn';
             div.textContent = name;
@@ -267,9 +269,8 @@ class NameWheel {
         const centerY = this.canvasHeight / 2;
         const radius = (this.canvasWidth * 0.4); // 40% of canvas width
         
-        // Clear canvas with subtle background
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        // Clear canvas with transparent background (ikke tegn noe bakgrunn)
+        this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         
         if (this.names.length === 0) {
             this.ctx.fillStyle = '#999';
@@ -279,8 +280,6 @@ class NameWheel {
             this.ctx.fillText('Lägg till namn för att börja!', centerX, centerY);
             return;
         }
-        
-        const sliceAngle = (2 * Math.PI) / this.names.length;
         
         this.ctx.save();
         this.ctx.translate(centerX, centerY);
@@ -297,8 +296,11 @@ class NameWheel {
             { light: '#B8A489', dark: '#A89479' }   // Sand/varm beige
         ];
         
-        const displayNames = this.showDrawn.checked ? this.names : 
-            this.names.filter(name => !this.drawnNames.includes(name));
+        // Alltid exkludera redan dragna namn från hjulet
+        const displayNames = this.names.filter(name => !this.drawnNames.includes(name));
+        
+        // Beräkna vinkel baserat på återstående namn, inte alla namn
+        const sliceAngle = displayNames.length > 0 ? (2 * Math.PI) / displayNames.length : 0;
         
         displayNames.forEach((name, index) => {
             const startAngle = index * sliceAngle;
@@ -438,8 +440,11 @@ class NameWheel {
                 
                 // Get selected name
                 const selectedName = this.getSelectedName();
-                if (selectedName && !this.drawnNames.includes(selectedName)) {
-                    this.drawnNames.unshift(selectedName);
+                if (selectedName) {
+                    this.drawingHistory.unshift(selectedName);  // Lägg till i historik
+                    if (!this.drawnNames.includes(selectedName)) {
+                        this.drawnNames.unshift(selectedName);
+                    }
                 }
                 
                 this.updateUI();
@@ -451,8 +456,8 @@ class NameWheel {
     }
     
     getSelectedName() {
-        const displayNames = this.showDrawn.checked ? this.names : 
-            this.names.filter(name => !this.drawnNames.includes(name));
+        // Alltid exkludera redan dragna namn
+        const displayNames = this.names.filter(name => !this.drawnNames.includes(name));
         
         if (displayNames.length === 0) return null;
         
@@ -470,6 +475,7 @@ class NameWheel {
         const data = {
             names: this.names,
             drawnNames: this.drawnNames,
+            drawingHistory: this.drawingHistory,
             rotation: this.currentRotation,
             classes: this.classes
         };
@@ -482,6 +488,7 @@ class NameWheel {
             const parsed = JSON.parse(data);
             this.names = parsed.names || [];
             this.drawnNames = parsed.drawnNames || [];
+            this.drawingHistory = parsed.drawingHistory || [];
             this.currentRotation = parsed.rotation || 0;
             this.classes = parsed.classes || {};
             this.updateUI();
