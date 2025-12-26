@@ -466,16 +466,42 @@ class NameWheel {
         const sliceAngle = (2 * Math.PI) / displayNames.length;
         const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        // Segment i börjar vid vinkel: i * sliceAngle (innan rotation)
-        // Efter rotation blir det: i * sliceAngle + currentRotation
-        // Pekaren är överst (3π/2)
-        // Vi vill: i * sliceAngle + currentRotation = 3π/2
+        // I drawWheel():
+        // - Vi gör ctx.rotate(currentRotation) INNAN vi ritar
+        // - Segment i börjar vid vinkel: startAngle = i * sliceAngle (i roterad koordinatsystem)
+        // - I globala koordinater (innan rotation) är segment i vid: startAngle = i * sliceAngle + currentRotation
+        // 
+        // Pekaren är överst i GLOBALA koordinater: globalAngle = 3π/2 - π/2 = π (eller 3π/2? Vi måste testa)
+        // 
+        // Canvas: 0° är åt höger, π/2 är nedåt, π är åt vänster, 3π/2 är uppåt
+        // Så "överst" = 3π/2
+        // 
+        // Vi vill hitta vilket segment som är vid 3π/2:
+        // i * sliceAngle + currentRotation = 3π/2
         // i = (3π/2 - currentRotation) / sliceAngle
         
-        let selectedIndex = Math.round((3 * Math.PI / 2 - normalizedRotation) / sliceAngle);
-        selectedIndex = ((selectedIndex % displayNames.length) + displayNames.length) % displayNames.length;
+        let angle = (3 * Math.PI / 2 - normalizedRotation);
+        // Normalisera till 0..2π
+        angle = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        
+        let selectedIndex = Math.round(angle / sliceAngle);
+        selectedIndex = selectedIndex % displayNames.length;
         
         const selectedName = displayNames[selectedIndex];
+        
+        // Debug: Visa alla segmenter
+        console.log('=== ROTATION TEST ===');
+        console.log('currentRotation:', normalizedRotation, '(', (normalizedRotation * 180 / Math.PI).toFixed(1), '°)');
+        console.log('sliceAngle:', (sliceAngle * 180 / Math.PI).toFixed(1), '°');
+        console.log('Pointer angle (3π/2):', (3 * Math.PI / 2 * 180 / Math.PI).toFixed(1), '°');
+        console.log('Calculated angle:', (angle * 180 / Math.PI).toFixed(1), '°');
+        displayNames.forEach((name, i) => {
+            const segmentStart = (i * sliceAngle + normalizedRotation) % (2 * Math.PI);
+            const segmentEnd = ((i + 1) * sliceAngle + normalizedRotation) % (2 * Math.PI);
+            console.log(`  [${i}] ${name}: ${(segmentStart * 180 / Math.PI).toFixed(1)}° - ${(segmentEnd * 180 / Math.PI).toFixed(1)}°`);
+        });
+        console.log('SELECTED:', selectedIndex, '-', selectedName);
+        console.log('===================');
         
         return selectedName;
     }
