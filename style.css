@@ -105,10 +105,19 @@ main {
     display: inline-block;
 }
 
-.fullscreen-btn {
+.fullscreen-btn-wrapper {
     position: absolute;
     top: 12px;
     right: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    z-index: 100;
+}
+
+.fullscreen-btn {
+    position: static;
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid #e0ddd8;
     border-radius: 8px;
@@ -124,7 +133,6 @@ main {
     height: 36px;
     min-width: 36px;
     min-height: 36px;
-    z-index: 100;
 }
 
 .fullscreen-btn:hover {
@@ -134,6 +142,15 @@ main {
 
 .fullscreen-btn:active {
     transform: scale(0.95);
+}
+
+.fullscreen-label {
+    font-size: 0.4em;
+    color: #a0a0a5;
+    text-align: center;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 body.fullscreen-mode {
