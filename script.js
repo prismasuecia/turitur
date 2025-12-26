@@ -236,13 +236,21 @@ class NameWheel {
     }
     
     drawWheel() {
+        // Scale canvas for high DPI (retina) displays
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = this.canvasWidth * dpr;
+        this.canvas.height = this.canvasHeight * dpr;
+        this.canvas.style.width = this.canvasWidth + 'px';
+        this.canvas.style.height = this.canvasHeight + 'px';
+        this.ctx.scale(dpr, dpr);
+        
         const centerX = this.canvasWidth / 2;
         const centerY = this.canvasHeight / 2;
         const radius = (this.canvasWidth * 0.4); // 40% of canvas width
         
-        // Clear canvas
-        this.ctx.fillStyle = 'white';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Clear canvas with subtle background
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
         
         if (this.names.length === 0) {
             this.ctx.fillStyle = '#999';
@@ -259,9 +267,15 @@ class NameWheel {
         this.ctx.translate(centerX, centerY);
         this.ctx.rotate(this.currentRotation);
         
+        // Montessori & NPF-anpassad färgpalett – lågmätt, sofistikerad, lugnande
         const colors = [
-            '#667eea', '#764ba2', '#f093fb', '#4facfe',
-            '#43e97b', '#fa709a', '#30b0fe', '#feca57'
+            { light: '#5B7C99', dark: '#4A6E88' },  // Blå (fokus, stabilitet)
+            { light: '#9EC1D9', dark: '#8DB3CE' },  // Ljus dimblå (luft, andrum)
+            { light: '#7FAF8A', dark: '#6F9F7A' },  // Grön (balans, trygghet)
+            { light: '#C89B5C', dark: '#B88B4C' },  // Ockra/varm orange
+            { light: '#C66A5A', dark: '#B65A4A' },  // Dämpad terrakotta
+            { light: '#8C79A8', dark: '#7C6998' },  // Mjuk plommon/lila
+            { light: '#B8A489', dark: '#A89479' }   // Sand/varm beige
         ];
         
         const displayNames = this.showDrawn.checked ? this.names : 
@@ -271,56 +285,96 @@ class NameWheel {
             const startAngle = index * sliceAngle;
             const endAngle = (index + 1) * sliceAngle;
             
-            // Draw slice
-            const color = colors[index % colors.length];
-            this.ctx.fillStyle = this.drawnNames.includes(name) ? 
-                this.lightenColor(color) : color;
+            const colorPair = colors[index % colors.length];
+            const isDrawn = this.drawnNames.includes(name);
+            
+            // Draw segment with modern gradient
+            const gradient = this.ctx.createLinearGradient(
+                Math.cos(startAngle) * radius, Math.sin(startAngle) * radius,
+                Math.cos(endAngle) * radius, Math.sin(endAngle) * radius
+            );
+            
+            const lightColor = isDrawn ? this.lightenColor(colorPair.light, 100) : colorPair.light;
+            const darkColor = isDrawn ? this.lightenColor(colorPair.dark, 80) : colorPair.dark;
+            
+            gradient.addColorStop(0, lightColor);
+            gradient.addColorStop(0.5, colorPair.light);
+            gradient.addColorStop(1, darkColor);
+            
+            this.ctx.fillStyle = gradient;
             this.ctx.beginPath();
             this.ctx.moveTo(0, 0);
             this.ctx.arc(0, 0, radius, startAngle, endAngle);
             this.ctx.closePath();
             this.ctx.fill();
             
-            // Draw border
-            this.ctx.strokeStyle = 'white';
-            this.ctx.lineWidth = 2;
+            // Elegant segment border
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+            this.ctx.lineWidth = 3.5;
+            this.ctx.lineCap = 'round';
+            this.ctx.lineJoin = 'round';
             this.ctx.stroke();
             
-            // Draw text
+            // Subtle dark line for depth
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+            this.ctx.lineWidth = 1;
+            this.ctx.stroke();
+            
+            // Draw text with improved rendering
             const textAngle = startAngle + sliceAngle / 2;
-            const textX = Math.cos(textAngle) * (radius * 0.65);
-            const textY = Math.sin(textAngle) * (radius * 0.65);
+            const textX = Math.cos(textAngle) * (radius * 0.62);
+            const textY = Math.sin(textAngle) * (radius * 0.62);
             
             this.ctx.save();
             this.ctx.translate(textX, textY);
             this.ctx.rotate(textAngle + Math.PI / 2);
             this.ctx.fillStyle = 'white';
-            this.ctx.font = 'bold 14px Arial';
+            this.ctx.font = '600 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             
-            const text = name.substring(0, 15);
+            // Text shadow for depth
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+            this.ctx.shadowBlur = 4;
+            this.ctx.shadowOffsetY = 1;
+            
+            const text = name.substring(0, 16);
             this.ctx.fillText(text, 0, 0);
             this.ctx.restore();
         });
         
         this.ctx.restore();
         
-        // Draw pointer at top
-        this.ctx.fillStyle = '#667eea';
+        // Premium Apple-style pointer with better design
+        this.ctx.fillStyle = '#4A6F8A';
+        
+        // Pointer shadow
+        this.ctx.shadowColor = 'rgba(74, 111, 138, 0.25)';
+        this.ctx.shadowBlur = 20;
+        this.ctx.shadowOffsetY = 6;
+        
+        // Draw pointer triangle
         this.ctx.beginPath();
-        this.ctx.moveTo(centerX - 15, 20);
-        this.ctx.lineTo(centerX + 15, 20);
-        this.ctx.lineTo(centerX, 50);
+        this.ctx.moveTo(centerX - 18, 26);
+        this.ctx.lineTo(centerX + 18, 26);
+        this.ctx.lineTo(centerX, 62);
         this.ctx.closePath();
         this.ctx.fill();
+        
+        // White outline for definition
+        this.ctx.shadowBlur = 0;
+        this.ctx.strokeStyle = 'white';
+        this.ctx.lineWidth = 2.5;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        this.ctx.stroke();
     }
     
-    lightenColor(color) {
+    lightenColor(color, amount = 50) {
         const hex = color.replace('#', '');
-        const r = Math.min(255, parseInt(hex.substr(0, 2), 16) + 50);
-        const g = Math.min(255, parseInt(hex.substr(2, 2), 16) + 50);
-        const b = Math.min(255, parseInt(hex.substr(4, 2), 16) + 50);
+        const r = Math.min(255, parseInt(hex.substr(0, 2), 16) + amount);
+        const g = Math.min(255, parseInt(hex.substr(2, 2), 16) + amount);
+        const b = Math.min(255, parseInt(hex.substr(4, 2), 16) + amount);
         return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
     
@@ -371,10 +425,6 @@ class NameWheel {
                 
                 this.updateUI();
                 this.saveToLocalStorage();
-                
-                if (selectedName) {
-                    alert(`🎉 ${selectedName} vald!`);
-                }
             }
         };
         
