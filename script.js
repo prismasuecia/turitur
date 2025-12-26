@@ -465,16 +465,18 @@ class NameWheel {
         
         const sliceAngle = (2 * Math.PI) / displayNames.length;
         
-        // Räkna från hjulets rendering: segment i börjar vid vinkel i*sliceAngle
-        // Efter rotation med currentRotation medsols, är segment i vid: i*sliceAngle - currentRotation
-        // Pekaren är överst (3π/2). Vi vill veta vilket segment som hamnar där.
-        // Lös: i*sliceAngle - currentRotation = 3π/2
-        // i = (3π/2 + currentRotation) / sliceAngle
+        // Segment i börjar vid vinkel: i * sliceAngle (innan rotation)
+        // Efter rotation medsols med currentRotation, ligger segment i vid globala vinkeln:
+        // globalAngle = i * sliceAngle - currentRotation
+        
+        // Pekaren är överst: globalAngle = 3π/2
+        // Vi vill hitta i där: i * sliceAngle - currentRotation = 3π/2
+        // Alltså: i = (3π/2 + currentRotation) / sliceAngle
         
         const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        let selectedIndex = Math.floor((normalizedRotation + 3 * Math.PI / 2) / sliceAngle);
-        selectedIndex = ((selectedIndex % displayNames.length) + displayNames.length) % displayNames.length;
+        let selectedIndex = Math.round((3 * Math.PI / 2 + normalizedRotation) / sliceAngle);
+        selectedIndex = selectedIndex % displayNames.length;
         
         const selectedName = displayNames[selectedIndex];
         
