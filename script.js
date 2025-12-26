@@ -466,18 +466,9 @@ class NameWheel {
         const sliceAngle = (2 * Math.PI) / displayNames.length;
         const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        // Pekaren är vid 3π/2 i GLOBALA koordinater.
-        // I det ROTERADE koordinatsystemet (använt i drawWheel) är den vid:
-        // rotatedAngle = globalAngle - currentRotation = 3π/2 - currentRotation
-        
-        let rotatedAngle = 3 * Math.PI / 2 - normalizedRotation;
-        
-        // Normalisera till 0..2π så att floor() fungerar rätt
-        rotatedAngle = ((rotatedAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-        
-        // Segment index är helt enkelt vilken "slice" denna vinkel faller i
-        let selectedIndex = Math.floor(rotatedAngle / sliceAngle);
-        selectedIndex = selectedIndex % displayNames.length;
+        // Testa: maybe rotation är motsatt riktning
+        let selectedIndex = Math.floor((normalizedRotation - 3 * Math.PI / 2) / sliceAngle);
+        selectedIndex = ((selectedIndex % displayNames.length) + displayNames.length) % displayNames.length;
         
         const selectedName = displayNames[selectedIndex];
         
