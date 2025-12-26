@@ -126,18 +126,9 @@ class NameWheel {
         
         let namesToAdd = [];
         
-        // Debug: Log what we got
-        console.log('Input length:', input.length);
-        console.log('Input:', JSON.stringify(input));
-        console.log('Contains newline:', input.includes('\n'));
-        console.log('Contains carriage return:', input.includes('\r'));
-        
         // Split on ANY whitespace (spaces, tabs, newlines, carriage returns)
         // This regex matches one or more whitespace characters
-        namesToAdd = input.split(/[\s\n\r]+/).filter(n => n.trim() !== '');
-        
-        console.log('Parsed names:', namesToAdd);
-        console.log('Number of names:', namesToAdd.length);
+        namesToAdd = input.split(/[\s\n\r,]+/).filter(n => n.trim() !== '');
         
         if (namesToAdd.length === 0) {
             alert('Kunde inte hitta några giltiga namn!');
