@@ -440,8 +440,17 @@ class NameWheel {
                 this.isSpinning = false;
                 this.spinButton.disabled = false;
                 
+                // Normalisera currentRotation för att säkerställa vi är mellan 0-2π
+                this.currentRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+                
                 // Get selected name
                 const selectedName = this.getSelectedName();
+                console.log('SPIN ENDED - selectedName:', selectedName);
+                console.log('  currentRotation:', (this.currentRotation * 180 / Math.PI).toFixed(1) + '°');
+                console.log('  drawnNames:', this.drawnNames);
+                const displayNames = this.names.filter(name => !this.drawnNames.includes(name));
+                console.log('  displayNames:', displayNames);
+                
                 if (selectedName) {
                     this.drawingHistory.unshift(selectedName);  // Lägg till i historik
                     if (!this.drawnNames.includes(selectedName)) {
