@@ -405,9 +405,8 @@ class NameWheel {
     spin() {
         if (this.isSpinning || this.names.length === 0) return;
         
-        const availableNames = this.excludeDrawn.checked ? 
-            this.names.filter(name => !this.drawnNames.includes(name)) : 
-            this.names;
+        // Alltid använd samma filtreringlogik som getSelectedName()
+        const availableNames = this.names.filter(name => !this.drawnNames.includes(name));
         
         if (availableNames.length === 0) {
             alert('Inga namn kvar att välja!');
