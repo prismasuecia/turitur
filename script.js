@@ -2,14 +2,14 @@ class NameWheel {
     constructor() {
         this.names = [];
         this.drawnNames = [];
-        this.drawingHistory = [];  // Sparar alla drag i ordning (kan ha duplikater)
+        this.drawingHistory = [];
         this.isSpinning = false;
         this.currentRotation = 0;
-        this.classes = {}; // Spara klasslistor
+        this.classes = {};
         
         // Canvas size - will be updated based on screen
-        this.canvasWidth = 600;
-        this.canvasHeight = 600;
+        this.canvasWidth = 900;
+        this.canvasHeight = 900;
         
         // DOM Elements
         this.canvas = document.getElementById('wheelCanvas');
@@ -20,11 +20,9 @@ class NameWheel {
         this.clearButton = document.getElementById('clearButton');
         this.resetButton = document.getElementById('resetButton');
         this.namesList = document.getElementById('namesList');
-        this.historyList = document.getElementById('historyList');
         this.nameCount = document.getElementById('nameCount');
         this.excludeDrawn = document.getElementById('excludeDrawn');
         this.showDrawn = document.getElementById('showDrawn');
-        this.clearHistoryButton = document.getElementById('clearHistoryButton');
         
         // Class elements
         this.classNameInput = document.getElementById('classNameInput');
@@ -60,14 +58,14 @@ class NameWheel {
         } else {
             // Normal mode: adjust canvas size based on viewport
             if (window.innerWidth < 768) {
-                this.canvasWidth = 300;
-                this.canvasHeight = 300;
+                this.canvasWidth = 320;
+                this.canvasHeight = 320;
             } else if (window.innerWidth < 1200) {
-                this.canvasWidth = 450;
-                this.canvasHeight = 450;
+                this.canvasWidth = 480;
+                this.canvasHeight = 480;
             } else {
-                this.canvasWidth = 600;
-                this.canvasHeight = 600;
+                this.canvasWidth = 720;
+                this.canvasHeight = 720;
             }
         }
         
@@ -93,7 +91,6 @@ class NameWheel {
         this.clearButton.addEventListener('click', () => this.clearNames());
         this.resetButton.addEventListener('click', () => this.reset());
         this.showDrawn.addEventListener('change', () => this.drawWheel());
-        this.clearHistoryButton.addEventListener('click', () => this.clearHistory());
         
         // Fullscreen toggle
         const fullscreenBtn = document.getElementById('fullscreenToggle');
@@ -195,18 +192,8 @@ class NameWheel {
         }
     }
     
-    clearHistory() {
-        if (this.drawingHistory.length === 0) return;
-        if (confirm('Är du säker på att du vill rensa historiken?')) {
-            this.drawingHistory = [];
-            this.updateHistory();
-            this.saveToLocalStorage();
-        }
-    }
-    
     updateUI() {
         this.updateNamesList();
-        this.updateHistory();
         this.updateClassSelector();
         this.drawWheel();
         this.spinButton.disabled = this.names.length === 0;
@@ -231,22 +218,6 @@ class NameWheel {
             });
             
             this.namesList.appendChild(li);
-        });
-    }
-    
-    updateHistory() {
-        this.historyList.innerHTML = '';
-        
-        if (this.drawingHistory.length === 0) {
-            this.historyList.innerHTML = '<p class="empty-message">Ingen historia ännu</p>';
-            return;
-        }
-        
-        this.drawingHistory.forEach(name => {
-            const div = document.createElement('div');
-            div.className = 'history-item drawn';
-            div.textContent = name;
-            this.historyList.appendChild(div);
         });
     }
     
@@ -301,7 +272,6 @@ class NameWheel {
             const endAngle = (index + 1) * sliceAngle;
             
             const colorPair = colors[index % colors.length];
-            const isDrawn = this.drawnNames.includes(name);
             
             // Draw segment with modern gradient
             const gradient = this.ctx.createLinearGradient(
@@ -309,8 +279,8 @@ class NameWheel {
                 Math.cos(endAngle) * radius, Math.sin(endAngle) * radius
             );
             
-            const lightColor = isDrawn ? this.lightenColor(colorPair.light, 100) : colorPair.light;
-            const darkColor = isDrawn ? this.lightenColor(colorPair.dark, 80) : colorPair.dark;
+            let lightColor = colorPair.light;
+            let darkColor = colorPair.dark;
             
             gradient.addColorStop(0, lightColor);
             gradient.addColorStop(0.5, colorPair.light);
@@ -337,8 +307,8 @@ class NameWheel {
             
             // Draw text with improved rendering
             const textAngle = startAngle + sliceAngle / 2;
-            const textX = Math.cos(textAngle) * (radius * 0.62);
-            const textY = Math.sin(textAngle) * (radius * 0.62);
+            const textX = Math.cos(textAngle) * (radius * 0.87);
+            const textY = Math.sin(textAngle) * (radius * 0.87);
             
             this.ctx.save();
             this.ctx.translate(textX, textY);
@@ -383,6 +353,17 @@ class NameWheel {
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
         this.ctx.stroke();
+        
+        // Draw selected name display under the pointer
+        const selectedName = this.getSelectedName();
+        if (selectedName) {
+            this.ctx.shadowBlur = 0;
+            this.ctx.fillStyle = '#333';
+            this.ctx.font = 'bold 20px Arial, sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'top';
+            this.ctx.fillText(selectedName, centerX, 75);
+        }
     }
     
     lightenColor(color, amount = 50) {
@@ -434,15 +415,44 @@ class NameWheel {
                 // Normalisera currentRotation för att säkerställa vi är mellan 0-2π
                 this.currentRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
                 
-                // Get selected name
+                // Snap: align the selected segment's midpoint exactly under the pointer
+                const displayNames = this.names.filter(name => !this.drawnNames.includes(name));
+                if (displayNames.length > 0) {
+                    const sliceAngle = (2 * Math.PI) / displayNames.length;
+                    const pointerAngle = -Math.PI / 2;
+                    
+                    // Compute the currently selected index using the same method as getSelectedName()
+                    let normalizedRotation = this.currentRotation % (2 * Math.PI);
+                    if (normalizedRotation < 0) normalizedRotation += 2 * Math.PI;
+                    let relativeAngle = (pointerAngle - normalizedRotation + 2 * Math.PI) % (2 * Math.PI);
+                    const selectedIndex = Math.floor(relativeAngle / sliceAngle) % displayNames.length;
+                    
+                    // Midpoint angle for the selected segment (in wheel coordinates)
+                    const targetSegmentMidAngle = (selectedIndex + 0.5) * sliceAngle;
+                    
+                    // Rotate so that segment midpoint appears at the pointer angle
+                    // angle_on_screen = base_angle + currentRotation => set to pointerAngle
+                    this.currentRotation = pointerAngle - targetSegmentMidAngle;
+                    
+                    // Small epsilon to avoid landing exactly on a boundary due to float error
+                    this.currentRotation += 1e-6;
+                    
+                    // Normalize
+                    this.currentRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+                }
+                
+                // After snapping, get the selected name
                 const selectedName = this.getSelectedName();
+                
+                // Lägg till i historik och drawnNames
                 if (selectedName) {
-                    this.drawingHistory.unshift(selectedName);  // Lägg till i historik
+                    this.drawingHistory.unshift(selectedName);
                     if (!this.drawnNames.includes(selectedName)) {
                         this.drawnNames.unshift(selectedName);
                     }
                 }
                 
+                // Uppdatera UI
                 this.updateUI();
                 this.saveToLocalStorage();
             }
@@ -452,40 +462,55 @@ class NameWheel {
     }
     
     getSelectedName() {
-        // Alltid exkludera redan dragna namn
         const displayNames = this.names.filter(name => !this.drawnNames.includes(name));
         
         if (displayNames.length === 0) return null;
         
         const sliceAngle = (2 * Math.PI) / displayNames.length;
-        const normalizedRotation = ((this.currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        // Pointer is at top (3π/2 in canvas coordinates)
-        // Canvas.rotate() rotates the content, so segment at (pointer_angle + rotation) is now at pointer
-        const selectedIndex = Math.floor((3 * Math.PI / 2 + normalizedRotation) / sliceAngle) % displayNames.length;
-        const selectedName = displayNames[selectedIndex];
+        // Normalisera currentRotation till intervallet [0, 2π)
+        let normalizedRotation = this.currentRotation % (2 * Math.PI);
+        if (normalizedRotation < 0) normalizedRotation += 2 * Math.PI;
         
-        return selectedName;
+        // Pekaren är fixerad vid toppen av canvas = vinkel -π/2 (eller 3π/2)
+        const pointerAngle = -Math.PI / 2;
+        
+        // Beräkna relativ vinkel från pekaren till hjulrotationen
+        let relativeAngle = pointerAngle - normalizedRotation;
+        
+        // Normalisera till [0, 2π)
+        relativeAngle = (relativeAngle + 2 * Math.PI) % (2 * Math.PI);
+        
+        // Använd Math.floor för exakta och förutsägbara segmentgränser
+        const selectedIndex = Math.floor(relativeAngle / sliceAngle) % displayNames.length;
+        
+        return displayNames[selectedIndex];
     }
     
     saveToLocalStorage() {
-        const data = {
-            names: this.names,
-            drawnNames: this.drawnNames,
-            drawingHistory: this.drawingHistory,
-            rotation: this.currentRotation,
-            classes: this.classes
-        };
-        localStorage.setItem('nameWheelData', JSON.stringify(data));
+        try {
+            const data = {
+                names: this.names,
+                drawnNames: this.drawnNames,
+                drawingHistory: this.drawingHistory,
+                rotation: this.currentRotation,
+                classes: this.classes
+            };
+            localStorage.setItem('nameWheelData', JSON.stringify(data));
+            console.log('✓ Data sparad till localStorage', data);
+        } catch (e) {
+            console.error('✗ Kunde inte spara till localStorage:', e);
+            alert('Varning: Kunde inte spara data. localStorage kan vara disabled eller fullt.');
+        }
     }
     
     loadFromLocalStorage() {
         const data = localStorage.getItem('nameWheelData');
         if (data) {
             const parsed = JSON.parse(data);
-            this.names = parsed.names || [];
-            this.drawnNames = parsed.drawnNames || [];
-            this.drawingHistory = parsed.drawingHistory || [];
+            this.names = (parsed.names || []).map(n => n.trim());
+            this.drawnNames = (parsed.drawnNames || []).map(n => n.trim());
+            this.drawingHistory = (parsed.drawingHistory || []).map(n => n.trim());
             this.currentRotation = parsed.rotation || 0;
             this.classes = parsed.classes || {};
             this.updateUI();
@@ -635,20 +660,6 @@ class NameWheel {
         }
     }
 
-    setupHistoryToggle() {
-        const historyToggle = document.getElementById('historyToggle');
-        const historyContent = document.getElementById('historyContent');
-        
-        historyToggle.addEventListener('click', () => {
-            historyContent.classList.toggle('collapsed');
-            historyToggle.classList.toggle('collapsed');
-        });
-
-        // Start collapsed
-        historyContent.classList.add('collapsed');
-        historyToggle.classList.add('collapsed');
-    }
-
     updateInstructionVisibility() {
         const instruction = document.querySelector('.spinner-instruction');
         if (instruction) {
@@ -660,5 +671,4 @@ class NameWheel {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     const wheel = new NameWheel();
-    wheel.setupHistoryToggle();
 });
